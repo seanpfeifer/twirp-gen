@@ -1,12 +1,12 @@
 function createRequest(url, body) {
-  return new Request(url, {
-    method: "POST",
-    credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
+	return new Request(url, {
+		method: "POST",
+		credentials: "same-origin",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(body),
+	});
 }
 
 // This is a multi-line comment using double slashes

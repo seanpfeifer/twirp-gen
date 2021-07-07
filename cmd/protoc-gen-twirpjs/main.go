@@ -1,78 +1,68 @@
 package main
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
+	"flag"
 	"io"
-	"io/ioutil"
-	"os"
 	"strings"
 	"text/template"
 
-	"github.com/seanpfeifer/rigging/logging"
 	"google.golang.org/protobuf/compiler/protogen"
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/pluginpb"
 )
 
 const (
 	outFileName = "generated.js"
-	prefix      = "rpc/"
+
+	twirpUtil = `function createRequest(url, body) {
+	return new Request(url, {
+		method: "POST",
+		credentials: "same-origin",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(body),
+	});
+}
+`
+	methodTempl = `
+{{.Comments.Leading}}export async function {{.JSName}}({{range $i, $v := .Input.Fields}}{{if $i}}, {{end}}{{$v.Desc.JSONName}}{{end}}) {
+	const res = await fetch(createRequest("{{.PathPrefix}}/{{.Desc.ParentFile.Package}}.{{.Parent.GoName}}/{{.GoName}}", { {{range $i, $v := .Input.Fields}}{{if $i}}, {{end}}"{{$v.Desc.JSONName}}": {{$v.Desc.JSONName}}{{end}} }));
+	const jsonBody = await res.json();
+	if (res.ok) {
+		return jsonBody;
+	}
+	throw new Error(jsonBody.msg);
+}
+`
 )
 
 func main() {
-	// Read the code gen request from Stdin, where protoc is writing
-	req, err := readRequest(os.Stdin)
-	logging.FatalIfError(err)
+	// Set up our flags. The only one we care about for now is the server path prefix.
+	var flags flag.FlagSet
+	prefix := flags.String("pathPrefix", "/twirp", "the server path prefix to use, if modified from the Twirp default")
 
 	// No special options for this generator
-	opts := protogen.Options{}
-	// Parse out all of the plugin info from the request
-	plugin, err := opts.New(req)
-	logging.FatalIfError(err)
+	opts := protogen.Options{ParamFunc: flags.Set}
+	opts.Run(func(plugin *protogen.Plugin) error {
+		gen, err := newGenerator(*prefix)
+		if err != nil {
+			return err
+		}
 
-	// Actually do the generation using the nice structures we get from protogen.Plugin
-	// Note that protogen.Plugin already has walked the dependency tree to handle imports
-	resp := generatePlugin(plugin)
+		out := plugin.NewGeneratedFile(outFileName, "")
+		out.Write([]byte(twirpUtil))
 
-	// Finally marshal our response to Stdout for the calling protoc to handle
-	err = marshalResponse(os.Stdout, resp)
-	logging.FatalIfError(err)
-}
-
-const twirpUtil = `function createRequest(url, body) {
-  return new Request(url, {
-    method: "POST",
-    credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-}
-`
-
-func generatePlugin(plugin *protogen.Plugin) *pluginpb.CodeGeneratorResponse {
-	buf := bytes.Buffer{}
-	// First write our utility function
-	buf.WriteString(twirpUtil)
-
-	for _, file := range plugin.Files {
-		for _, svc := range file.Services {
-			for _, method := range svc.Methods {
-				generatePluginMethod(&buf, method)
+		for _, file := range plugin.Files {
+			for _, svc := range file.Services {
+				for _, method := range svc.Methods {
+					if err := gen.writeMethod(out, method); err != nil {
+						return err
+					}
+				}
 			}
 		}
-	}
 
-	respFile := pluginpb.CodeGeneratorResponse_File{}
-	respFile.Content = proto.String(buf.String())
-	respFile.Name = proto.String(outFileName)
-
-	resp := new(pluginpb.CodeGeneratorResponse)
-	resp.File = []*pluginpb.CodeGeneratorResponse_File{&respFile}
-	return resp
+		return nil
+	})
 }
 
 type jsMethod struct {
@@ -88,56 +78,27 @@ func (j jsMethod) JSName() string {
 	return strings.ToLower(j.GoName[:1]) + j.GoName[1:]
 }
 
-func generatePluginMethod(w io.Writer, method *protogen.Method) {
-	funcTempl := `
-{{.Comments.Leading}}export async function {{.JSName}}({{range $i, $v := .Input.Fields}}{{if $i}}, {{end}}{{$v.Desc.JSONName}}{{end}}) {
-	const res = await fetch(createRequest("/{{.PathPrefix}}{{.Desc.ParentFile.Package}}.{{.Parent.GoName}}/{{.GoName}}", { {{range $i, $v := .Input.Fields}}{{if $i}}, {{end}}"{{$v.Desc.JSONName}}": {{$v.Desc.JSONName}}{{end}} }));
-	const jsonBody = await res.json();
-	if (res.ok) {
-		return jsonBody;
+func newGenerator(prefix string) (*generator, error) {
+	methodTemplate, err := template.New("func").Parse(methodTempl)
+	if err != nil {
+		return nil, err
 	}
-	throw new Error(jsonBody.msg);
+
+	return &generator{
+		Prefix:         prefix,
+		MethodTemplate: methodTemplate,
+	}, nil
 }
-`
 
-	t := template.Must(template.New("func").Parse(funcTempl))
+type generator struct {
+	Prefix         string
+	MethodTemplate *template.Template
+}
 
+func (g generator) writeMethod(w io.Writer, method *protogen.Method) error {
 	in := jsMethod{
 		Method:     method,
-		PathPrefix: prefix,
+		PathPrefix: g.Prefix,
 	}
-	t.Execute(w, in)
-}
-
-// readRequest reads the encoded request from the Reader, returning it and an error (if any).
-func readRequest(r io.Reader) (*pluginpb.CodeGeneratorRequest, error) {
-	data, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, fmt.Errorf("error reading input: %v", err)
-	}
-
-	req := pluginpb.CodeGeneratorRequest{}
-	if err = proto.Unmarshal(data, &req); err != nil {
-		return nil, fmt.Errorf("error parsing input proto: %v", err)
-	}
-
-	if len(req.FileToGenerate) == 0 {
-		return nil, errors.New("no files to generate")
-	}
-
-	return &req, nil
-}
-
-// marshalResponse marshals the resulting response to the given Writer, returning an error if any occurs.
-func marshalResponse(w io.Writer, resp *pluginpb.CodeGeneratorResponse) error {
-	data, err := proto.Marshal(resp)
-	if err != nil {
-		return fmt.Errorf("marshaling response: %v", err)
-	}
-	_, err = w.Write(data)
-	if err != nil {
-		return fmt.Errorf("writing response: %v", err)
-	}
-
-	return nil
+	return g.MethodTemplate.Execute(w, in)
 }

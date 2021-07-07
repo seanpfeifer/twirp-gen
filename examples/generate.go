@@ -1,3 +1,3 @@
 package examples
 
-//go:generate protoc -I . --twirpjs_out=../pbgen/ ./*.proto
+//go:generate protoc -I . --twirpjs_out=pathPrefix=/rpc:../pbgen/ ./*.proto
