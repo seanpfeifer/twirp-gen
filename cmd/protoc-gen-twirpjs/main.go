@@ -77,6 +77,7 @@ func generatePlugin(plugin *protogen.Plugin) *pluginpb.CodeGeneratorResponse {
 
 type jsMethod struct {
 	*protogen.Method
+	PathPrefix string
 }
 
 // JSName exists as a way to get our camelCase method name.
@@ -90,7 +91,7 @@ func (j jsMethod) JSName() string {
 func generatePluginMethod(w io.Writer, method *protogen.Method) {
 	funcTempl := `
 {{.Comments.Leading}}export async function {{.JSName}}({{range $i, $v := .Input.Fields}}{{if $i}}, {{end}}{{$v.Desc.JSONName}}{{end}}) {
-	const res = await fetch(createRequest("/` + prefix + `{{.Desc.ParentFile.Package}}.{{.Parent.GoName}}/{{.GoName}}", { {{range $i, $v := .Input.Fields}}{{if $i}}, {{end}}"{{$v.Desc.JSONName}}": {{$v.Desc.JSONName}}{{end}} }));
+	const res = await fetch(createRequest("/{{.PathPrefix}}{{.Desc.ParentFile.Package}}.{{.Parent.GoName}}/{{.GoName}}", { {{range $i, $v := .Input.Fields}}{{if $i}}, {{end}}"{{$v.Desc.JSONName}}": {{$v.Desc.JSONName}}{{end}} }));
 	const jsonBody = await res.json();
 	if (res.ok) {
 		return jsonBody;
@@ -101,7 +102,10 @@ func generatePluginMethod(w io.Writer, method *protogen.Method) {
 
 	t := template.Must(template.New("func").Parse(funcTempl))
 
-	in := jsMethod{method}
+	in := jsMethod{
+		Method:     method,
+		PathPrefix: prefix,
+	}
 	t.Execute(w, in)
 }
 
