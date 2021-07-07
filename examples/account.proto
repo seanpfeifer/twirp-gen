@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package account;
+
+option go_package = "github.com/seanpfeifer/twirp-gen/pbgen";
+
+import "shared.proto";
+
+service Accounts {
+  // This is a multi-line comment using double slashes
+  // and should render appropriately on output.
+  rpc GetAccountDetails(AccountDetailsRequest) returns(AccountDetailsResponse) {}
+  /* This is a multi-line block comment, which is
+  also expected to render properly.
+  */
+  rpc Logout(LogoutRequest) returns(LogoutResponse) {}
+}
+
+message AccountDetailsRequest {
+  string account_email = 1; // The email associated with the account in question
+}
+message AccountDetailsResponse {
+  AccountDetails account = 1;
+}
+
+message LogoutRequest {
+  // The account ID associated with the logout request
+  int64 account_id = 1;
+  // The specific token to invalidate on logout
+  bytes token      = 2;
+}
+message LogoutResponse {}

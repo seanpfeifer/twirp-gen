@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package shop;
+
+option go_package = "github.com/seanpfeifer/twirp-gen/pbgen";
+
+service Shop {
+  // Creates a checkout session for the given item.
+  rpc CreateCheckoutSession(CheckoutRequest) returns(CheckoutResponse) {}
+}
+
+
+message CheckoutRequest {
+  string item_id = 1;
+}
+message CheckoutResponse {
+  string session_id = 1;
+}

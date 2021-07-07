@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package account;
+
+option go_package = "github.com/seanpfeifer/twirp-gen/pbgen";
+
+message AccountDetails {
+	int64 account_id  = 1;
+	string email      = 2;
+	uint64 coin_count = 3;
+}
