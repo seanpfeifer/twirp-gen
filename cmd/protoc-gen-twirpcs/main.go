@@ -7,6 +7,7 @@ import (
 	"text/template"
 
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 const (
@@ -34,10 +35,10 @@ public class GeneratedAPI {
       }
     }
   }
-{{range .Files}}{{range .Services}}{{range .Methods}}{{$svc := .Parent.GoName}}{{$req := .Input.Desc.Name}}{{$resp := .Output.Desc.Name}}
+{{range .Files}}{{range .Services}}{{range .Methods}}{{$pkg := UpperFirst .Desc.ParentFile.Name}}{{$req := .Input.Desc.Name}}{{$resp := .Output.Desc.Name}}
 {{Tab .Comments.Leading.String -}}
-  public static async Task<{{$svc}}.{{$resp}}> {{.GoName}}(HttpClient client, {{$svc}}.{{$req}} req) {
-    return await DoRequest<{{$svc}}.{{$req}}, {{$svc}}.{{$resp}}>(client, "{{$.PathPrefix}}/{{.Desc.ParentFile.Package}}.{{$svc}}/{{.GoName}}", req, {{$svc}}.{{$resp}}.Parser.ParseFrom);
+  public static async Task<{{$pkg}}.{{$resp}}> {{.GoName}}(HttpClient client, {{$pkg}}.{{$req}} req) {
+    return await DoRequest<{{$pkg}}.{{$req}}, {{$pkg}}.{{$resp}}>(client, "{{$.PathPrefix}}/{{.Desc.ParentFile.Package}}.{{$pkg}}/{{.GoName}}", req, {{$pkg}}.{{$resp}}.Parser.ParseFrom);
   }
 {{end}}{{end}}{{end}}}
 `
@@ -54,7 +55,7 @@ func main() {
 		out := plugin.NewGeneratedFile(outFileName, "")
 
 		template, err := template.New("file").
-			Funcs(template.FuncMap{"Tab": tabNewlines}).
+			Funcs(template.FuncMap{"Tab": tabNewlines, "UpperFirst": upperFirst}).
 			Parse(fileTemplate)
 		if err != nil {
 			return err
@@ -77,4 +78,11 @@ type jsData struct {
 // tabNewlines adds tabs (as two spaces) to the beginning of each line in the input string.
 func tabNewlines(lines string) string {
 	return "  " + strings.Replace(lines, "\n", "\n  ", -1)
+}
+
+func upperFirst(name protoreflect.Name) string {
+	if name == "" {
+		return ""
+	}
+	return strings.ToUpper(string(name[:1])) + string(name[1:])
 }
