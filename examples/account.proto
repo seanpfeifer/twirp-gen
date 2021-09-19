@@ -14,6 +14,7 @@ service Accounts {
   also expected to render properly.
   */
   rpc Logout(LogoutRequest) returns(LogoutResponse) {}
+  rpc NoComment(LogoutRequest) returns(LogoutResponse) {}
 }
 
 message AccountDetailsRequest {

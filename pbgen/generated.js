@@ -33,6 +33,15 @@ export async function logout(accountId, token) {
 	throw new Error(jsonBody.msg);
 }
 
+export async function noComment(accountId, token) {
+	const res = await fetch(createRequest("/rpc/account.Accounts/NoComment", { "accountId": accountId, "token": token }));
+	const jsonBody = await res.json();
+	if (res.ok) {
+		return jsonBody;
+	}
+	throw new Error(jsonBody.msg);
+}
+
 // Creates a checkout session for the given item.
 export async function createCheckoutSession(itemId) {
 	const res = await fetch(createRequest("/rpc/shop.Shop/CreateCheckoutSession", { "itemId": itemId }));
