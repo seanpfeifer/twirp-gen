@@ -15,6 +15,8 @@ This is an extremely simple generator for JavaScript. It makes a few assumptions
 
 Another extremely simple generator, but for C#. This client makes requests using binary serialized Protobuf.
 
+On error, the generated functions will throw a `GeneratedAPI.Exception`.
+
 ## Installing
 
 ```sh
