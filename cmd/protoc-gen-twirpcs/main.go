@@ -49,7 +49,7 @@ public class GeneratedAPI {
     }
     return new GeneratedAPI.Exception(errorCode, msg);
   }
-  
+
   private static string parseJSONString(string jsonData, string key) {
     var keyIndex = jsonData.IndexOf(key + "\":\"");
     if (keyIndex == -1) { return null; }
