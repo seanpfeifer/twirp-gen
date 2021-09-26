@@ -43,10 +43,10 @@ public class GeneratedAPI {
 
     ErrorCode errorCode = ErrorCode.Unknown;
     System.Enum.TryParse<ErrorCode>(codeStr, true, out errorCode);
-		var msg = parseJSONString(jsonData, "msg");
-		if (msg == null) {
-			msg = jsonData;
-		}
+    var msg = parseJSONString(jsonData, "msg");
+    if (msg == null) {
+      msg = jsonData;
+    }
     return new GeneratedAPI.Exception(errorCode, msg);
   }
   
