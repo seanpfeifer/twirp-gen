@@ -9,13 +9,51 @@ using Google.Protobuf; // For ".ToByteArray()"
 public class GeneratedAPI {
   public static readonly MediaTypeWithQualityHeaderValue CONTENT_TYPE_PROTOBUF = new MediaTypeWithQualityHeaderValue("application/protobuf");
 
+  public enum ErrorCode {
+    NoError, Canceled, Unknown, Invalid_Argument, Malformed, Deadline_Exceeded, Not_Found, Bad_Route, Already_Exists, Permission_Denied,
+    Unauthenticated, Resource_Exhausted, Failed_Precondition, Aborted, Out_Of_Range, Unimplemented, Internal, Unavailable, Data_Loss
+  };
+
+  public class Exception : System.Exception {
+    public readonly ErrorCode Type;
+
+    public Exception(ErrorCode type, string message) : base(message) { Type = type; }
+  }
+
+  private static GeneratedAPI.Exception createException(string jsonData) {
+    var codeStr = parseJSONString(jsonData, "code");
+    if (codeStr == null) {
+      return new GeneratedAPI.Exception(ErrorCode.Unknown, jsonData);
+    }
+
+    ErrorCode errorCode = ErrorCode.Unknown;
+    System.Enum.TryParse<ErrorCode>(codeStr, true, out errorCode);
+    var msg = parseJSONString(jsonData, "msg");
+    if (msg == null) {
+      msg = jsonData;
+    }
+    return new GeneratedAPI.Exception(errorCode, msg);
+  }
+
+  private static string parseJSONString(string jsonData, string key) {
+    var keyIndex = jsonData.IndexOf(key + "\":\"");
+    if (keyIndex == -1) { return null; }
+    keyIndex += key.Length + 3;
+    var dataEnd = jsonData.IndexOf("\"", keyIndex);
+    if (dataEnd == -1) { return null; }
+    return jsonData.Substring(keyIndex, dataEnd - keyIndex);
+  }
+
   private delegate Resp doParsing<Resp>(byte[] data) where Resp : IMessage;
   private static async Task<Resp> DoRequest<Req, Resp>(HttpClient client, string address, Req req, doParsing<Resp> parserFunc) where Req : IMessage where Resp : IMessage {
     using (var content = new ByteArrayContent(req.ToByteArray())) {
       content.Headers.ContentType = CONTENT_TYPE_PROTOBUF;
       using (HttpResponseMessage response = await client.PostAsync(address, content)) {
-        response.EnsureSuccessStatusCode();
         var byteArr = await response.Content.ReadAsByteArrayAsync();
+        if (!response.IsSuccessStatusCode) {
+          string errorJSON = System.Text.Encoding.UTF8.GetString(byteArr, 0, byteArr.Length);
+          throw createException(errorJSON);
+        }
         return parserFunc(byteArr);
       }
     }
