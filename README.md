@@ -6,10 +6,10 @@ Simple Protobuf code generators specifically for Twirp services.
 
 ```sh
 # For JavaScript generation
-go install github.com/seanpfeifer/twirp-gen/cmd/protoc-gen-twirpjs
+go install github.com/seanpfeifer/twirp-gen/cmd/protoc-gen-twirpjs@latest
 
 # For C# generation
-go install github.com/seanpfeifer/twirp-gen/cmd/protoc-gen-twirpcs
+go install github.com/seanpfeifer/twirp-gen/cmd/protoc-gen-twirpcs@latest
 ```
 
 Ensure your `~/go/bin` (Linux) or `%USERPROFILE%/go/bin` (Windows) are on your PATH.
