@@ -61,6 +61,6 @@ public class GeneratedAPI {
 {{range .Files}}{{range .Services}}{{range .Methods}}{{$pkg := Title .Desc.ParentFile.Name}}{{$req := .Input.Desc.Name}}{{$resp := .Output.Desc.Name}}
 {{Tab .Comments.Leading.String -}}
   public static async Task<{{$pkg}}.{{$resp}}> {{.GoName}}(HttpClient client, {{$pkg}}.{{$req}} req) {
-    return await DoRequest<{{$pkg}}.{{$req}}, {{$pkg}}.{{$resp}}>(client, "{{$.PathPrefix}}/{{.Desc.ParentFile.Package}}.{{$pkg}}/{{.GoName}}", req, {{$pkg}}.{{$resp}}.Parser.ParseFrom);
+    return await DoRequest<{{$pkg}}.{{$req}}, {{$pkg}}.{{$resp}}>(client, "{{$.PathPrefix}}/{{.Desc.ParentFile.Package}}.{{.Parent.GoName}}/{{.GoName}}", req, {{$pkg}}.{{$resp}}.Parser.ParseFrom);
   }
 {{end}}{{end}}{{end}}}

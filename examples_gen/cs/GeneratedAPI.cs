@@ -62,17 +62,17 @@ public class GeneratedAPI {
   // This is a multi-line comment using double slashes
   // and should render appropriately on output.
   public static async Task<Account.AccountDetailsResponse> GetAccountDetails(HttpClient client, Account.AccountDetailsRequest req) {
-    return await DoRequest<Account.AccountDetailsRequest, Account.AccountDetailsResponse>(client, "/rpc/account.Account/GetAccountDetails", req, Account.AccountDetailsResponse.Parser.ParseFrom);
+    return await DoRequest<Account.AccountDetailsRequest, Account.AccountDetailsResponse>(client, "/rpc/account.Accounts/GetAccountDetails", req, Account.AccountDetailsResponse.Parser.ParseFrom);
   }
 
   // This is a multi-line block comment, which is
   //also expected to render properly.
   public static async Task<Account.LogoutResponse> Logout(HttpClient client, Account.LogoutRequest req) {
-    return await DoRequest<Account.LogoutRequest, Account.LogoutResponse>(client, "/rpc/account.Account/Logout", req, Account.LogoutResponse.Parser.ParseFrom);
+    return await DoRequest<Account.LogoutRequest, Account.LogoutResponse>(client, "/rpc/account.Accounts/Logout", req, Account.LogoutResponse.Parser.ParseFrom);
   }
 
   public static async Task<Account.LogoutResponse> NoComment(HttpClient client, Account.LogoutRequest req) {
-    return await DoRequest<Account.LogoutRequest, Account.LogoutResponse>(client, "/rpc/account.Account/NoComment", req, Account.LogoutResponse.Parser.ParseFrom);
+    return await DoRequest<Account.LogoutRequest, Account.LogoutResponse>(client, "/rpc/account.Accounts/NoComment", req, Account.LogoutResponse.Parser.ParseFrom);
   }
 
   // Creates a checkout session for the given item.
