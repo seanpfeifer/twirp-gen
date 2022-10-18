@@ -24,14 +24,14 @@ namespace Account {
     static SharedReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "CgxzaGFyZWQucHJvdG8SB2FjY291bnQiRwoOQWNjb3VudERldGFpbHMSEgoK",
-            "YWNjb3VudF9pZBgBIAEoAxINCgVlbWFpbBgCIAEoCRISCgpjb2luX2NvdW50",
-            "GAMgASgEQihaJmdpdGh1Yi5jb20vc2VhbnBmZWlmZXIvdHdpcnAtZ2VuL3Bi",
-            "Z2VuYgZwcm90bzM="));
+            "CgxzaGFyZWQucHJvdG8SB2FjY291bnQiWwoOQWNjb3VudERldGFpbHMSEgoK",
+            "YWNjb3VudF9pZBgBIAEoAxINCgVlbWFpbBgCIAEoCRIXCgpjb2luX2NvdW50",
+            "GAMgASgESACIAQFCDQoLX2NvaW5fY291bnRCKFomZ2l0aHViLmNvbS9zZWFu",
+            "cGZlaWZlci90d2lycC1nZW4vcGJnZW5iBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Account.AccountDetails), global::Account.AccountDetails.Parser, new[]{ "AccountId", "Email", "CoinCount" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Account.AccountDetails), global::Account.AccountDetails.Parser, new[]{ "AccountId", "Email", "CoinCount" }, new[]{ "CoinCount" }, null, null, null)
           }));
     }
     #endregion
@@ -45,6 +45,7 @@ namespace Account {
   {
     private static readonly pb::MessageParser<AccountDetails> _parser = new pb::MessageParser<AccountDetails>(() => new AccountDetails());
     private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pb::MessageParser<AccountDetails> Parser { get { return _parser; } }
@@ -72,6 +73,7 @@ namespace Account {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public AccountDetails(AccountDetails other) : this() {
+      _hasBits0 = other._hasBits0;
       accountId_ = other.accountId_;
       email_ = other.email_;
       coinCount_ = other.coinCount_;
@@ -114,10 +116,23 @@ namespace Account {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public ulong CoinCount {
-      get { return coinCount_; }
+      get { if ((_hasBits0 & 1) != 0) { return coinCount_; } else { return 0UL; } }
       set {
+        _hasBits0 |= 1;
         coinCount_ = value;
       }
+    }
+    /// <summary>Gets whether the "coin_count" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool HasCoinCount {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "coin_count" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void ClearCoinCount() {
+      _hasBits0 &= ~1;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -147,7 +162,7 @@ namespace Account {
       int hash = 1;
       if (AccountId != 0L) hash ^= AccountId.GetHashCode();
       if (Email.Length != 0) hash ^= Email.GetHashCode();
-      if (CoinCount != 0UL) hash ^= CoinCount.GetHashCode();
+      if (HasCoinCount) hash ^= CoinCount.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -174,7 +189,7 @@ namespace Account {
         output.WriteRawTag(18);
         output.WriteString(Email);
       }
-      if (CoinCount != 0UL) {
+      if (HasCoinCount) {
         output.WriteRawTag(24);
         output.WriteUInt64(CoinCount);
       }
@@ -196,7 +211,7 @@ namespace Account {
         output.WriteRawTag(18);
         output.WriteString(Email);
       }
-      if (CoinCount != 0UL) {
+      if (HasCoinCount) {
         output.WriteRawTag(24);
         output.WriteUInt64(CoinCount);
       }
@@ -216,7 +231,7 @@ namespace Account {
       if (Email.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Email);
       }
-      if (CoinCount != 0UL) {
+      if (HasCoinCount) {
         size += 1 + pb::CodedOutputStream.ComputeUInt64Size(CoinCount);
       }
       if (_unknownFields != null) {
@@ -237,7 +252,7 @@ namespace Account {
       if (other.Email.Length != 0) {
         Email = other.Email;
       }
-      if (other.CoinCount != 0UL) {
+      if (other.HasCoinCount) {
         CoinCount = other.CoinCount;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
