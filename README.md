@@ -2,6 +2,8 @@
 
 Simple Protobuf code generators specifically for Twirp services.
 
+This exists because other code generators either required external dependencies or were too complex for my needs.
+
 ## Installing
 
 ```sh
@@ -31,7 +33,7 @@ protoc -I ./examples --twirpcs_out=pathPrefix=/rpc:./examples_gen/ ./examples/*.
 
 ## JavaScript
 
-This is an extremely simple generator for JavaScript. It makes a few assumptions to keep things simple:
+This is an extremely simple generator for JavaScript, which communicates with JSON only. It makes a few assumptions to keep things simple:
 
 * Your Twirp server has the option `twirp.WithServerJSONCamelCaseNames(true)` set
   * This client uses proto3 JSON serialization instead of the snake-case default in Twirp
