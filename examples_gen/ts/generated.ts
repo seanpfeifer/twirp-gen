@@ -55,7 +55,7 @@ function createRequest(url: string, body: any): Request {
 
 // This is a multi-line comment using double slashes
 // and should render appropriately on output.
-export async function getAccountDetails(args: { accountEmail?: string }): Promise<{ account: any }> {
+export async function getAccountDetails(args: { accountEmail?: string }): Promise<{ account?: any }> {
 	const res = await fetch(createRequest("/rpc/account.Accounts/GetAccountDetails", args));
 	const jsonBody = await res.json();
 	if (res.ok) {
@@ -85,7 +85,7 @@ export async function noComment(args: { accountId?: bigint, token?: string }): P
 }
 
 // Creates a checkout session for the given item.
-export async function createCheckoutSession(args: { itemId?: string }): Promise<{ sessionId: string }> {
+export async function createCheckoutSession(args: { itemId?: string }): Promise<{ sessionId?: string }> {
 	const res = await fetch(createRequest("/rpc/shop.Shop/CreateCheckoutSession", args));
 	const jsonBody = await res.json();
 	if (res.ok) {

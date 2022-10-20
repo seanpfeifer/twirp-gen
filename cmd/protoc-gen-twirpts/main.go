@@ -18,6 +18,9 @@ const (
 //go:embed template.tmpl
 var fileTemplate string
 
+//go:embed listfields.tmpl
+var listTemplate string
+
 func main() {
 	// Set up our flags. The only one we care about for now is the server path prefix.
 	var flags flag.FlagSet
@@ -34,17 +37,22 @@ func main() {
 			PathPrefix: *prefix,
 		}
 
-		template, err := template.New("file").
+		tsTemplate, err := template.New("file").
 			Funcs(template.FuncMap{
 				"JSName":  JSName,
 				"GetType": in.GetType,
 			}).
-			Parse(fileTemplate)
+			Parse(listTemplate)
 		if err != nil {
 			return err
 		}
 
-		return template.Execute(out, in)
+		tsTemplate, err = tsTemplate.Parse(fileTemplate)
+		if err != nil {
+			return err
+		}
+
+		return tsTemplate.Execute(out, in)
 	})
 }
 

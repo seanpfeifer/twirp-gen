@@ -53,7 +53,7 @@ function createRequest(url: string, body: any): Request {
 	});
 }
 {{range .Files}}{{range .Services}}{{range .Methods}}
-{{.Comments.Leading}}export async function {{JSName .}}(args: { {{range $i, $v := .Input.Fields}}{{if $i}}, {{end}}{{$v.Desc.JSONName}}?: {{GetType $v.Desc}}{{end}} }): Promise<{ {{range $i, $v := .Output.Fields}}{{if $i}}, {{end}}{{$v.Desc.JSONName}}: {{GetType $v.Desc}}{{end}} }> {
+{{.Comments.Leading}}export async function {{JSName .}}(args: {{template "ListFields" .Input}}): Promise<{{template "ListFields" .Output}}> {
 	const res = await fetch(createRequest("{{$.PathPrefix}}/{{.Desc.ParentFile.Package}}.{{.Parent.GoName}}/{{.GoName}}", args));
 	const jsonBody = await res.json();
 	if (res.ok) {
