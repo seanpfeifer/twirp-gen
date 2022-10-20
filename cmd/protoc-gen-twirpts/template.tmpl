@@ -35,12 +35,25 @@ export class TwirpError extends Error {
 		public message: string,
 		public meta?: any,
 	) {
-    super(code + ": " + message);
-  }
+		super(code + ": " + message);
+	}
 }
 
 // Patch BigInt support into JSON.stringify
 BigInt.prototype["toJSON"] = function () { return this.toString() }
+
+// Use a custom parser to allow for bigints to be properly created
+async function parseJSON(res: Response): Promise<any> {
+	const text = await res.text();
+	return JSON.parse(text, (key, value) => {
+		// For anything more than 15 digits, assume it's a bigint.
+		// There is an edge case where a number with 15 digits or more will be treated as a bigint.
+		if (typeof value === "string" && value.match(/^\d{15,}$/)) {
+			return BigInt(value);
+		}
+		return value;
+	});
+}
 
 function createRequest(url: string, body: any): Request {
 	return new Request(host + url, {
@@ -55,7 +68,7 @@ function createRequest(url: string, body: any): Request {
 {{range .Files}}{{range .Services}}{{range .Methods}}
 {{.Comments.Leading}}export async function {{JSName .}}(args: {{template "ListFields" .Input}}): Promise<{{template "ListFields" .Output}}> {
 	const res = await fetch(createRequest("{{$.PathPrefix}}/{{.Desc.ParentFile.Package}}.{{.Parent.GoName}}/{{.GoName}}", args));
-	const jsonBody = await res.json();
+	const jsonBody = await parseJSON(res);
 	if (res.ok) {
 		return jsonBody;
 	}

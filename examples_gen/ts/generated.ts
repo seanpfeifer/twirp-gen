@@ -35,12 +35,25 @@ export class TwirpError extends Error {
 		public message: string,
 		public meta?: any,
 	) {
-    super(code + ": " + message);
-  }
+		super(code + ": " + message);
+	}
 }
 
 // Patch BigInt support into JSON.stringify
 BigInt.prototype["toJSON"] = function () { return this.toString() }
+
+// Use a custom parser to allow for bigints to be properly created
+async function parseJSON(res: Response): Promise<any> {
+	const text = await res.text();
+	return JSON.parse(text, (key, value) => {
+		// For anything more than 15 digits, assume it's a bigint.
+		// There is an edge case where a number with 15 digits or more will be treated as a bigint.
+		if (typeof value === "string" && value.match(/^\d{15,}$/)) {
+			return BigInt(value);
+		}
+		return value;
+	});
+}
 
 function createRequest(url: string, body: any): Request {
 	return new Request(host + url, {
@@ -55,9 +68,9 @@ function createRequest(url: string, body: any): Request {
 
 // This is a multi-line comment using double slashes
 // and should render appropriately on output.
-export async function getAccountDetails(args: { accountEmail?: string }): Promise<{ account?: any }> {
+export async function getAccountDetails(args: { accountEmail?: string }): Promise<{ account?: { accountId?: bigint, email?: string, coinCount?: bigint } }> {
 	const res = await fetch(createRequest("/rpc/account.Accounts/GetAccountDetails", args));
-	const jsonBody = await res.json();
+	const jsonBody = await parseJSON(res);
 	if (res.ok) {
 		return jsonBody;
 	}
@@ -68,7 +81,7 @@ export async function getAccountDetails(args: { accountEmail?: string }): Promis
 //also expected to render properly.
 export async function logout(args: { accountId?: bigint, token?: string }): Promise<{  }> {
 	const res = await fetch(createRequest("/rpc/account.Accounts/Logout", args));
-	const jsonBody = await res.json();
+	const jsonBody = await parseJSON(res);
 	if (res.ok) {
 		return jsonBody;
 	}
@@ -77,7 +90,7 @@ export async function logout(args: { accountId?: bigint, token?: string }): Prom
 
 export async function noComment(args: { accountId?: bigint, token?: string }): Promise<{  }> {
 	const res = await fetch(createRequest("/rpc/account.Accounts/NoComment", args));
-	const jsonBody = await res.json();
+	const jsonBody = await parseJSON(res);
 	if (res.ok) {
 		return jsonBody;
 	}
@@ -87,7 +100,7 @@ export async function noComment(args: { accountId?: bigint, token?: string }): P
 // Creates a checkout session for the given item.
 export async function createCheckoutSession(args: { itemId?: string }): Promise<{ sessionId?: string }> {
 	const res = await fetch(createRequest("/rpc/shop.Shop/CreateCheckoutSession", args));
-	const jsonBody = await res.json();
+	const jsonBody = await parseJSON(res);
 	if (res.ok) {
 		return jsonBody;
 	}
