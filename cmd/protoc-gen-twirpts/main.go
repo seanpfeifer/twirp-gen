@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	_ "embed"
 	"flag"
 	"strings"
@@ -47,6 +48,7 @@ func main() {
 			return err
 		}
 
+		// Add onto the list template by adding the rest of the file template
 		tsTemplate, err = tsTemplate.Parse(fileTemplate)
 		if err != nil {
 			return err
@@ -97,8 +99,20 @@ func (j *jsData) GetType(desc protoreflect.FieldDescriptor) string {
 		// NOT using Uint8Array here, as these end up getting encoded/decoded as base64 strings
 		return "string"
 	case protoreflect.MessageKind:
-		// TODO: Check for types we've generated. For now, this will be "any"
-		return "any"
+		buf := &bytes.Buffer{}
+		buf.WriteString("{ ")
+		fields := desc.Message().Fields()
+		for i := 0; i < fields.Len(); i++ {
+			field := fields.Get(i)
+			if i > 0 {
+				buf.WriteString(", ")
+			}
+			buf.WriteString(field.JSONName())
+			buf.WriteString("?: ")
+			buf.WriteString(j.GetType(field))
+		}
+		buf.WriteString(" }")
+		return buf.String()
 	case protoreflect.GroupKind: // Not supported - explicitly a deprecated Protobuf feature
 		return "any"
 	default:
