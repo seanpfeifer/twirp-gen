@@ -113,6 +113,9 @@ namespace Account {
     /// <summary>Field number for the "coin_count" field.</summary>
     public const int CoinCountFieldNumber = 3;
     private ulong coinCount_;
+    /// <summary>
+    /// "optional" is now supported in proto3
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public ulong CoinCount {

@@ -7,5 +7,6 @@ option go_package = "github.com/seanpfeifer/twirp-gen/pbgen";
 message AccountDetails {
 	int64 account_id           = 1;
 	string email               = 2;
-	optional uint64 coin_count = 3; // "optional" is now supported in proto3
+  // "optional" is now supported in proto3
+	optional uint64 coin_count = 3;
 }
