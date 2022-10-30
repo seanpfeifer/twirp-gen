@@ -7,6 +7,16 @@ export function setHost(newHost: string) {
 	host = newHost;
 }
 
+// TODO: These aren't very good, and are difficult to use - make this better
+// To iterate through this, use eg `...Object.entries(myMap)`
+export interface StringMap<V> {
+  [key: string]: V;
+}
+
+export interface NumberMap<V> {
+  [key: number]: V;
+}
+
 export enum TwirpErrorCode {
 	NoError = "NoError",
 	Canceled = "Canceled",
