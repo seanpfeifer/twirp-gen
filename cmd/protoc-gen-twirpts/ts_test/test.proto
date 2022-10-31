@@ -11,7 +11,7 @@ service Characters {
 }
 
 // The Protobuf types and common types we need to handle (that aren't handled in our example) are:
-//   enum, map<K,V>, repeated, oneof
+//   enum, map<K,V>, repeated, oneof, nested types
 // Others may be added if they're needed.
 
 
@@ -26,12 +26,27 @@ message CharacterRequest {
 message Item {
   string name    = 1;
   int32 quantity = 2;
+  message Type {
+    string name = 1;
+    int32 power = 2;
+  }
+  Type item_type = 3;
 }
 
 message CharacterResponse {
   map<string, Item> items = 1;
   repeated Item stash     = 2;
   Class char_class        = 3;
+  enum Type {
+    PLAYER = 0;
+    NPC    = 1;
+  }
+  Type char_type          = 4;
+  message History {
+    string parent   = 1;
+    string hometown = 2;
+  }
+  History history         = 5;
 }
 
 enum Class {

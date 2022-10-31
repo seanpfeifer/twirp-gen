@@ -36,6 +36,8 @@ func main() {
 		in := jsData{
 			Files:      plugin.Files,
 			PathPrefix: *prefix,
+			GenTypes:   make(map[string]string),
+			GenEnums:   make(map[string]string),
 		}
 
 		tsTemplate, err := template.New("file").
@@ -61,6 +63,9 @@ func main() {
 type jsData struct {
 	Files      []*protogen.File
 	PathPrefix string
+	// Maps the type name to the TypeScript type itself
+	GenTypes map[string]string
+	GenEnums map[string]string
 }
 
 func (j *jsData) GetType(desc protoreflect.FieldDescriptor) string {
@@ -122,33 +127,45 @@ func JSName(m *protogen.Method) string {
 
 func (j *jsData) generateMessage(msg protoreflect.MessageDescriptor) string {
 	buf := bytes.Buffer{}
-	buf.WriteString("{ ")
 	fields := msg.Fields()
 	for i := 0; i < fields.Len(); i++ {
 		field := fields.Get(i)
-		if i > 0 {
-			buf.WriteString(", ")
-		}
+		buf.WriteString("\t")
 		buf.WriteString(field.JSONName())
 		buf.WriteString("?: ")
 		buf.WriteString(j.GetType(field))
+		buf.WriteString(";\n")
 	}
-	buf.WriteString(" }")
-	return buf.String()
+
+	typeDef := buf.String()
+	typeName := convertFullName(msg.FullName())
+	j.GenTypes[typeName] = typeDef
+
+	return typeName
+}
+
+func convertFullName(name protoreflect.FullName) string {
+	names := strings.Split(string(name), ".")[1:]
+	return strings.Join(names, "_")
 }
 
 func (j *jsData) generateEnum(enum protoreflect.EnumDescriptor) string {
 	// Enums can be represented as either numbers or strings, but strings are easier to read
 	buf := bytes.Buffer{}
 	for i := 0; i < enum.Values().Len(); i++ {
-		if i != 0 {
-			buf.WriteString(` | `)
-		}
-		buf.WriteString(`"`)
-		buf.WriteString(string(enum.Values().Get(i).Name()))
-		buf.WriteString(`"`)
+		value := string(enum.Values().Get(i).Name())
+		buf.WriteString("\t")
+		buf.WriteString(value)
+		buf.WriteString(` = "`)
+		buf.WriteString(value)
+		buf.WriteString("\",\n")
 	}
-	return buf.String()
+
+	typeDef := buf.String()
+	typeName := convertFullName(enum.FullName())
+	j.GenEnums[typeName] = typeDef
+
+	return typeName
 }
 
 func (j *jsData) generateMap(desc protoreflect.FieldDescriptor) string {

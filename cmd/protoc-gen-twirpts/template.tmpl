@@ -84,4 +84,14 @@ function createRequest(url: string, body: any): Request {
 	}
 	throw new TwirpError(jsonBody.code, jsonBody.msg, jsonBody.meta);
 }
-{{end}}{{end}}{{end}}
+{{end}}{{end}}{{end -}}
+
+{{range $typeName, $typeDef := .GenTypes}}
+export interface {{$typeName}} {
+{{$typeDef}}}
+{{end -}}
+
+{{range $typeName, $typeDef := .GenEnums}}
+export enum {{$typeName}} {
+{{$typeDef}}}
+{{end -}}

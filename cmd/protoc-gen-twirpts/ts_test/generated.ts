@@ -76,7 +76,7 @@ function createRequest(url: string, body: any): Request {
 	});
 }
 
-export async function getCharacter(args: { name?: string, mapName?: string, wtbItem?: { name?: string, quantity?: number } }): Promise<{ items?: StringMap<{ name?: string, quantity?: number }>, stash?: { name?: string, quantity?: number }, charClass?: "CLASS_WARRIOR" | "CLASS_MAGE" | "CLASS_ROGUE" }> {
+export async function getCharacter(args: { name?: string, mapName?: string, wtbItem?: Item }): Promise<{ items?: StringMap<Item>, stash?: Item, charClass?: Class, charType?: CharacterResponse_Type, history?: CharacterResponse_History }> {
 	const res = await fetch(createRequest("/rpc/characters.Characters/GetCharacter", args));
 	const jsonBody = await parseJSON(res);
 	if (res.ok) {
@@ -85,3 +85,29 @@ export async function getCharacter(args: { name?: string, mapName?: string, wtbI
 	throw new TwirpError(jsonBody.code, jsonBody.msg, jsonBody.meta);
 }
 
+export interface CharacterResponse_History {
+	parent?: string;
+	hometown?: string;
+}
+
+export interface Item {
+	name?: string;
+	quantity?: number;
+	itemType?: Item_Type;
+}
+
+export interface Item_Type {
+	name?: string;
+	power?: number;
+}
+
+export enum CharacterResponse_Type {
+	PLAYER = "PLAYER",
+	NPC = "NPC",
+}
+
+export enum Class {
+	CLASS_WARRIOR = "CLASS_WARRIOR",
+	CLASS_MAGE = "CLASS_MAGE",
+	CLASS_ROGUE = "CLASS_ROGUE",
+}
