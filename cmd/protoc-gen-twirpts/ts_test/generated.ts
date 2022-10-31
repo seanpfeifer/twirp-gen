@@ -76,13 +76,27 @@ function createRequest(url: string, body: any): Request {
 	});
 }
 
-export async function getCharacter(args: { name?: string, mapName?: string, wtbItem?: Item }): Promise<{ items?: StringMap<Item>, stash?: Item, charClass?: Class, charType?: CharacterResponse_Type, history?: CharacterResponse_History }> {
+export async function getCharacter(args: CharacterRequest): Promise<CharacterResponse> {
 	const res = await fetch(createRequest("/rpc/characters.Characters/GetCharacter", args));
 	const jsonBody = await parseJSON(res);
 	if (res.ok) {
 		return jsonBody;
 	}
 	throw new TwirpError(jsonBody.code, jsonBody.msg, jsonBody.meta);
+}
+
+export interface CharacterRequest {
+	name?: string;
+	mapName?: string;
+	wtbItem?: Item;
+}
+
+export interface CharacterResponse {
+	items?: StringMap<Item>;
+	stash?: Item;
+	charClass?: Class;
+	charType?: CharacterResponse_Type;
+	history?: CharacterResponse_History;
 }
 
 export interface CharacterResponse_History {

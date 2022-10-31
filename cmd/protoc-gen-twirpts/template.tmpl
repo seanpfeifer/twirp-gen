@@ -76,7 +76,7 @@ function createRequest(url: string, body: any): Request {
 	});
 }
 {{range .Files}}{{range .Services}}{{range .Methods}}
-{{.Comments.Leading}}export async function {{JSName .}}(args: {{template "ListFields" .Input}}): Promise<{{template "ListFields" .Output}}> {
+{{.Comments.Leading}}export async function {{JSName .}}(args: {{GenMsg .Input.Desc}}): Promise<{{GenMsg .Output.Desc}}> {
 	const res = await fetch(createRequest("{{$.PathPrefix}}/{{.Desc.ParentFile.Package}}.{{.Parent.GoName}}/{{.GoName}}", args));
 	const jsonBody = await parseJSON(res);
 	if (res.ok) {

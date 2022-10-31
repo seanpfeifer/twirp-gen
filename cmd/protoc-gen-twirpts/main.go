@@ -19,9 +19,6 @@ const (
 //go:embed template.tmpl
 var fileTemplate string
 
-//go:embed listfields.tmpl
-var listTemplate string
-
 func main() {
 	// Set up our flags. The only one we care about for now is the server path prefix.
 	var flags flag.FlagSet
@@ -44,14 +41,9 @@ func main() {
 			Funcs(template.FuncMap{
 				"JSName":  JSName,
 				"GetType": in.GetType,
+				"GenMsg":  in.GenerateMessage,
 			}).
-			Parse(listTemplate)
-		if err != nil {
-			return err
-		}
-
-		// Add onto the list template by adding the rest of the file template
-		tsTemplate, err = tsTemplate.Parse(fileTemplate)
+			Parse(fileTemplate)
 		if err != nil {
 			return err
 		}
@@ -108,7 +100,7 @@ func (j *jsData) GetType(desc protoreflect.FieldDescriptor) string {
 			// NOT using Uint8Array here, as these end up getting encoded/decoded as base64 strings
 			return "string"
 		case protoreflect.MessageKind:
-			return j.generateMessage(desc.Message())
+			return j.GenerateMessage(desc.Message())
 		case protoreflect.GroupKind: // Not supported - explicitly a deprecated Protobuf feature
 			return "any"
 		default:
@@ -125,7 +117,7 @@ func JSName(m *protogen.Method) string {
 	return strings.ToLower(m.GoName[:1]) + m.GoName[1:]
 }
 
-func (j *jsData) generateMessage(msg protoreflect.MessageDescriptor) string {
+func (j *jsData) GenerateMessage(msg protoreflect.MessageDescriptor) string {
 	buf := bytes.Buffer{}
 	fields := msg.Fields()
 	for i := 0; i < fields.Len(); i++ {

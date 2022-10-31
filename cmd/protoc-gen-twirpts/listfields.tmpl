@@ -1,1 +1,0 @@
-{{define "ListFields"}}{ {{range $i, $v := .Fields}}{{if $i}}, {{end}}{{$v.Desc.JSONName}}?: {{GetType $v.Desc}}{{end}} }{{end}}
