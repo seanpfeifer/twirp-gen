@@ -7,6 +7,16 @@ export function setHost(newHost: string) {
 	host = newHost;
 }
 
+// TODO: These aren't very good, and are difficult to use - make this better
+// To iterate through this, use eg `...Object.entries(myMap)`
+export interface StringMap<V> {
+  [key: string]: V;
+}
+
+export interface NumberMap<V> {
+  [key: number]: V;
+}
+
 export enum TwirpErrorCode {
 	NoError = "NoError",
 	Canceled = "Canceled",
@@ -68,7 +78,7 @@ function createRequest(url: string, body: any): Request {
 
 // This is a multi-line comment using double slashes
 // and should render appropriately on output.
-export async function getAccountDetails(args: { accountEmail?: string }): Promise<{ account?: { accountId?: bigint, email?: string, coinCount?: bigint } }> {
+export async function getAccountDetails(args: AccountDetailsRequest): Promise<AccountDetailsResponse> {
 	const res = await fetch(createRequest("/rpc/account.Accounts/GetAccountDetails", args));
 	const jsonBody = await parseJSON(res);
 	if (res.ok) {
@@ -79,7 +89,7 @@ export async function getAccountDetails(args: { accountEmail?: string }): Promis
 
 // This is a multi-line block comment, which is
 //also expected to render properly.
-export async function logout(args: { accountId?: bigint, token?: string }): Promise<{  }> {
+export async function logout(args: LogoutRequest): Promise<LogoutResponse> {
 	const res = await fetch(createRequest("/rpc/account.Accounts/Logout", args));
 	const jsonBody = await parseJSON(res);
 	if (res.ok) {
@@ -88,7 +98,7 @@ export async function logout(args: { accountId?: bigint, token?: string }): Prom
 	throw new TwirpError(jsonBody.code, jsonBody.msg, jsonBody.meta);
 }
 
-export async function noComment(args: { accountId?: bigint, token?: string }): Promise<{  }> {
+export async function noComment(args: LogoutRequest): Promise<LogoutResponse> {
 	const res = await fetch(createRequest("/rpc/account.Accounts/NoComment", args));
 	const jsonBody = await parseJSON(res);
 	if (res.ok) {
@@ -98,7 +108,7 @@ export async function noComment(args: { accountId?: bigint, token?: string }): P
 }
 
 // Creates a checkout session for the given item.
-export async function createCheckoutSession(args: { itemId?: string }): Promise<{ sessionId?: string }> {
+export async function createCheckoutSession(args: CheckoutRequest): Promise<CheckoutResponse> {
 	const res = await fetch(createRequest("/rpc/shop.Shop/CreateCheckoutSession", args));
 	const jsonBody = await parseJSON(res);
 	if (res.ok) {
@@ -107,3 +117,32 @@ export async function createCheckoutSession(args: { itemId?: string }): Promise<
 	throw new TwirpError(jsonBody.code, jsonBody.msg, jsonBody.meta);
 }
 
+export interface AccountDetails {
+	accountId?: bigint;
+	email?: string;
+	coinCount?: bigint;
+}
+
+export interface AccountDetailsRequest {
+	accountEmail?: string;
+}
+
+export interface AccountDetailsResponse {
+	account?: AccountDetails;
+}
+
+export interface CheckoutRequest {
+	itemId?: string;
+}
+
+export interface CheckoutResponse {
+	sessionId?: string;
+}
+
+export interface LogoutRequest {
+	accountId?: bigint;
+	token?: string;
+}
+
+export interface LogoutResponse {
+}
