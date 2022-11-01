@@ -89,6 +89,7 @@ export interface CharacterRequest {
 	name?: string;
 	mapName?: string;
 	wtbItem?: Item;
+	dreamClass?: Class;
 }
 
 export interface CharacterResponse {
@@ -116,8 +117,8 @@ export interface Item_Type {
 }
 
 export enum CharacterResponse_Type {
-	PLAYER = "PLAYER",
-	NPC = "NPC",
+	CHARTYPE_PLAYER = "CHARTYPE_PLAYER",
+	CHARTYPE_NPC = "CHARTYPE_NPC",
 }
 
 export enum Class {

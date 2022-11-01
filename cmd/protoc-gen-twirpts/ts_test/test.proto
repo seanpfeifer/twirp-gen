@@ -21,6 +21,7 @@ message CharacterRequest {
     string map_name = 2;
     Item wtb_item   = 3;
   }
+  Class dream_class = 4;
 }
 
 message Item {
@@ -38,8 +39,8 @@ message CharacterResponse {
   repeated Item stash     = 2;
   Class char_class        = 3;
   enum Type {
-    PLAYER = 0;
-    NPC    = 1;
+    CHARTYPE_PLAYER = 0;
+    CHARTYPE_NPC    = 1;
   }
   Type char_type          = 4;
   message History {
