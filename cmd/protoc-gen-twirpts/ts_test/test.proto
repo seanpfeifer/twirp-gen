@@ -5,6 +5,7 @@ syntax = "proto3";
 package characters;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
 
 option go_package = "github.com/seanpfeifer/twirp-gen/cmd/protoc-gen-twirpts/ts_test";
 
@@ -27,13 +28,14 @@ message CharacterRequest {
 }
 
 message Item {
-  string name    = 1;
-  int32 quantity = 2;
+  string name                             = 1;
+  int32 quantity                          = 2;
   message Type {
     string name = 1;
     int32 power = 2;
   }
-  Type item_type = 3;
+  Type item_type                          = 3;
+  google.protobuf.Struct extra_attributes = 4;
 }
 
 message CharacterResponse {

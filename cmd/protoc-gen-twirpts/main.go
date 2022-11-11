@@ -103,6 +103,8 @@ func (j *jsData) GetType(desc protoreflect.FieldDescriptor) string {
 			switch desc.Message().FullName() {
 			case "google.protobuf.Timestamp":
 				return "Date"
+			case "google.protobuf.Struct":
+				return "StringMap<any>"
 			default:
 				return j.GenerateMessage(desc.Message())
 			}

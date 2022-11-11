@@ -111,6 +111,7 @@ export interface Item {
 	name?: string;
 	quantity?: number;
 	itemType?: Item_Type;
+	extraAttributes?: StringMap<any>;
 }
 
 export interface Item_Type {
