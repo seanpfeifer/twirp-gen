@@ -23,6 +23,7 @@ func main() {
 	// Set up our flags. The only one we care about for now is the server path prefix.
 	var flags flag.FlagSet
 	prefix := flags.String("pathPrefix", "/twirp", "the server path prefix to use, if modified from the Twirp default")
+	useProtoCase := flags.Bool("protoCase", false, "override the default of using camelCase for field names, and use whatever was in the proto file instead")
 
 	// No special options for this generator
 	opts := protogen.Options{ParamFunc: flags.Set}
@@ -35,6 +36,7 @@ func main() {
 			PathPrefix: *prefix,
 			GenTypes:   make(map[string]string),
 			GenEnums:   make(map[string]string),
+			ProtoCase:  *useProtoCase,
 		}
 
 		tsTemplate, err := template.New("file").
@@ -56,8 +58,9 @@ type jsData struct {
 	Files      []*protogen.File
 	PathPrefix string
 	// Maps the type name to the TypeScript type itself
-	GenTypes map[string]string
-	GenEnums map[string]string
+	GenTypes  map[string]string
+	GenEnums  map[string]string
+	ProtoCase bool
 }
 
 func (j *jsData) GetType(desc protoreflect.FieldDescriptor) string {
@@ -140,7 +143,11 @@ func (j *jsData) GenerateMessage(msg protoreflect.MessageDescriptor) string {
 	for i := 0; i < fields.Len(); i++ {
 		field := fields.Get(i)
 		buf.WriteString("\t")
-		buf.WriteString(field.JSONName())
+		if j.ProtoCase {
+			buf.WriteString(string(field.Name()))
+		} else {
+			buf.WriteString(field.JSONName())
+		}
 		buf.WriteString("?: ")
 		buf.WriteString(j.GetType(field))
 		if field.IsList() {
