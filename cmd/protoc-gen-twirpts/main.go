@@ -105,6 +105,16 @@ func (j *jsData) GetType(desc protoreflect.FieldDescriptor) string {
 				return "Date"
 			case "google.protobuf.Struct":
 				return "StringMap<any>"
+			case "google.protobuf.Value":
+				return "any"
+			case "google.protobuf.ListValue":
+				return "any[]"
+			case "google.protobuf.NullValue":
+				return "null"
+			case "google.protobuf.Empty":
+				return "{}"
+			case "google.protobuf.Any":
+				return "any"
 			default:
 				return j.GenerateMessage(desc.Message())
 			}
