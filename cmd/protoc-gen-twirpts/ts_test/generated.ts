@@ -94,7 +94,7 @@ export interface CharacterRequest {
 
 export interface CharacterResponse {
 	items?: StringMap<Item>;
-	stash?: Item;
+	stash?: Item[];
 	charClass?: Class;
 	charType?: CharacterResponse_Type;
 	history?: CharacterResponse_History;
@@ -103,6 +103,8 @@ export interface CharacterResponse {
 export interface CharacterResponse_History {
 	parent?: string;
 	hometown?: string;
+	birth?: Date;
+	locationsVisited?: number[];
 }
 
 export interface Item {

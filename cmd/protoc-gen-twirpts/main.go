@@ -100,7 +100,12 @@ func (j *jsData) GetType(desc protoreflect.FieldDescriptor) string {
 			// NOT using Uint8Array here, as these end up getting encoded/decoded as base64 strings
 			return "string"
 		case protoreflect.MessageKind:
-			return j.GenerateMessage(desc.Message())
+			switch desc.Message().FullName() {
+			case "google.protobuf.Timestamp":
+				return "Date"
+			default:
+				return j.GenerateMessage(desc.Message())
+			}
 		case protoreflect.GroupKind: // Not supported - explicitly a deprecated Protobuf feature
 			return "any"
 		default:
@@ -126,6 +131,9 @@ func (j *jsData) GenerateMessage(msg protoreflect.MessageDescriptor) string {
 		buf.WriteString(field.JSONName())
 		buf.WriteString("?: ")
 		buf.WriteString(j.GetType(field))
+		if field.IsList() {
+			buf.WriteString("[]")
+		}
 		buf.WriteString(";\n")
 	}
 

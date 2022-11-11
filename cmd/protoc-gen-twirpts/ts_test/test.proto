@@ -4,6 +4,8 @@ syntax = "proto3";
 
 package characters;
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "github.com/seanpfeifer/twirp-gen/cmd/protoc-gen-twirpts/ts_test";
 
 service Characters {
@@ -11,7 +13,7 @@ service Characters {
 }
 
 // The Protobuf types and common types we need to handle (that aren't handled in our example) are:
-//   enum, map<K,V>, repeated, oneof, nested types
+//   enum, map<K,V>, repeated, oneof, nested types, Timestamp
 // Others may be added if they're needed.
 
 
@@ -44,8 +46,10 @@ message CharacterResponse {
   }
   Type char_type          = 4;
   message History {
-    string parent   = 1;
-    string hometown = 2;
+    string parent                    = 1;
+    string hometown                  = 2;
+    google.protobuf.Timestamp birth  = 3;
+    repeated int32 locations_visited = 4;
   }
   History history         = 5;
 }
