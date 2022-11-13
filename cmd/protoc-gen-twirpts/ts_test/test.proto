@@ -1,0 +1,63 @@
+// This file exists as a test for specific types that get serialized to JSON and need to be parsed appropriately.
+// The other languages do not need this, because the generators those rely on already do this.
+syntax = "proto3";
+
+package characters;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/seanpfeifer/twirp-gen/cmd/protoc-gen-twirpts/ts_test";
+
+service Characters {
+  rpc GetCharacter(CharacterRequest) returns(CharacterResponse) {}
+}
+
+// The Protobuf types and common types we need to handle (that aren't handled in our example) are:
+//   enum, map<K,V>, repeated, oneof, nested types, Timestamp
+// Others may be added if they're needed.
+
+
+message CharacterRequest {
+  string name       = 1;
+  oneof details {
+    string map_name = 2;
+    Item wtb_item   = 3;
+  }
+  Class dream_class = 4;
+}
+
+message Item {
+  string name                             = 1;
+  int32 quantity                          = 2;
+  message Type {
+    string name = 1;
+    int32 power = 2;
+  }
+  Type item_type                          = 3;
+  google.protobuf.Struct extra_attributes = 4;
+}
+
+message CharacterResponse {
+  map<string, Item> items = 1;
+  repeated Item stash     = 2;
+  Class char_class        = 3;
+  enum Type {
+    CHARTYPE_PLAYER = 0;
+    CHARTYPE_NPC    = 1;
+  }
+  Type char_type          = 4;
+  message History {
+    string parent                    = 1;
+    string hometown                  = 2;
+    google.protobuf.Timestamp birth  = 3;
+    repeated int32 locations_visited = 4;
+  }
+  History history         = 5;
+}
+
+enum Class {
+  CLASS_WARRIOR = 0;
+  CLASS_MAGE    = 1;
+  CLASS_ROGUE   = 2;
+}
