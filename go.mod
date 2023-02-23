@@ -1,5 +1,5 @@
 module github.com/seanpfeifer/twirp-gen
 
-go 1.18
+go 1.20
 
-require google.golang.org/protobuf v1.28.0
+require google.golang.org/protobuf v1.28.1
